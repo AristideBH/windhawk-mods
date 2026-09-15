@@ -33,7 +33,7 @@ The mod is designed to remain lightweight and self-contained while integrating w
   * `vector` — render a lightweight custom vector Windows 11-style icon.
   * `font` — render a glyph from an installed font family.
   * `custom` — load an `.ico`, `.png`, `.bmp`, or `.jpg` file.
-* **Four vector variants** — choose between a minimal geometric style with a lifted-lid full state, a Fluent-inspired trapezoidal style, a compact symbolic style, and Minibin, an outlined style with a rounded rim and a filled contents level.
+* **Four vector variants** — choose between a minimal geometric style with a lifted-lid full state, a Fluent-inspired trapezoidal style, a compact symbolic style, and Style 4, an outlined style with a rounded rim and a filled contents level.
 * **Separate icons for states and themes** — custom mode uses Empty/Full Light-theme files with optional Empty/Full Dark-theme alternatives.
 * **Optional auto-hide** — automatically hides the tray icon while the Recycle Bin is empty.
 * **Light / dark theme support** — vector and font rendering adapt to the current Windows system theme; custom icons use Light-theme source files, optional Dark-theme alternatives, and can automatically adapt transparent monochrome image colors to the active theme.
@@ -476,18 +476,18 @@ This project is licensed under the GNU General Public License Version 3.0.
   - style: style1
     $name: "Style variant"
     $name:fr-FR: "Variante du style"
-    $description: "Style 1 uses a minimal geometric 24x24 silhouette with a lifted lid and visible contents for the full state. Style 2 uses a Fluent-inspired trapezoidal silhouette. Style 3 uses a compact symbolic silhouette with a simple lid, handle, and body. Minibin uses an outlined silhouette with a rounded rim and a filled contents level for the full state."
-    $description:fr-FR: "Le Style 1 utilise une silhouette géométrique minimale sur une grille 24x24, avec couvercle soulevé et contenu visible lorsque la corbeille est pleine. Le Style 2 utilise une silhouette trapézoïdale inspirée de Fluent. Le Style 3 utilise une silhouette symbolique compacte avec un couvercle, une poignée et un corps simples. Minibin utilise une silhouette en contour avec un rebord arrondi et un niveau de contenu rempli lorsque la corbeille est pleine."
+    $description: "Style 1 uses a minimal geometric 24x24 silhouette with a lifted lid and visible contents for the full state. Style 2 uses a Fluent-inspired trapezoidal silhouette. Style 3 uses a compact symbolic silhouette with a simple lid, handle, and body. Style 4 uses an outlined silhouette with a rounded rim and a filled contents level for the full state."
+    $description:fr-FR: "Le Style 1 utilise une silhouette géométrique minimale sur une grille 24x24, avec couvercle soulevé et contenu visible lorsque la corbeille est pleine. Le Style 2 utilise une silhouette trapézoïdale inspirée de Fluent. Le Style 3 utilise une silhouette symbolique compacte avec un couvercle, une poignée et un corps simples. Le Style 4 utilise une silhouette en contour avec un rebord arrondi et un niveau de contenu rempli lorsque la corbeille est pleine."
     $options:
       - style1: Style 1 (Minimal / Geometric)
       - style2: Style 2 (Fluent / Trapezoidal)
       - style3: Style 3 (Symbolic / Simple)
-      - minibin: Minibin (Outlined / Rounded)
+      - style4: Style 4 (Outlined / Rounded)
     $options:fr-FR:
       - style1: Style 1 (Minimal / Géométrique)
       - style2: Style 2 (Fluent / Trapézoïdal)
       - style3: Style 3 (Symbolique / Simple)
-      - minibin: Minibin (Contour / Arrondi)
+      - style4: Style 4 (Contour / Arrondi)
   $name: "Vector"
   $name:fr-FR: "Vectoriel"
   $description: "Used only when Icon style is set to Vector."
@@ -2286,7 +2286,7 @@ void LoadSettingsInto(ModSettings& s) {
     if (_wcsicmp(s.vectorStyle, L"style1") != 0 &&
         _wcsicmp(s.vectorStyle, L"style2") != 0 &&
         _wcsicmp(s.vectorStyle, L"style3") != 0 &&
-        _wcsicmp(s.vectorStyle, L"minibin") != 0) {
+        _wcsicmp(s.vectorStyle, L"style4") != 0) {
         StringCchCopyW(s.vectorStyle, ARRAYSIZE(s.vectorStyle), L"style1");
     }
 
@@ -2930,561 +2930,567 @@ static void TiltLidPath_Style1(Gdiplus::GraphicsPath& path, float s) {
     path.Transform(&matrix);
 }
 
-// Minibin is a single compound-path renderer transcribed from vector-sourced
+// Style4 is a single compound-path renderer transcribed from vector-sourced
 // bezier geometry (MinibinTheme-W11 artwork), unlike the other styles' plain
 // polygons. Each contour below is one closed figure in the same GraphicsPath;
 // FillModeWinding (not GDI+'s default Alternate) is required for the body
 // opening and, in the full state, the contents fill to render as intended,
 // since they share winding direction with each other but run opposite to the
 // outer silhouette. Coordinates are pre-rescaled from the 128-unit source
-// artboard onto the 24-unit grid used by Style1/Style3, then inset ~28% and
-// re-centered at (12,12) to match their visual weight in the tray (the raw
-// artwork spans nearly the full grid edge to edge).
-static void BuildBodyPath_Minibin_Empty(Gdiplus::GraphicsPath& path, float s24) {
+// artboard onto the 24-unit grid used by Style1/Style3, then inset ~5% and
+// re-centered at (12,12) so the glyph reads larger/bolder in the tray than
+// Style1/Style3 (by design; the raw artwork spans nearly the full grid edge
+// to edge).
+static void BuildBodyPath_Style4_Empty(Gdiplus::GraphicsPath& path, float s24) {
     path.Reset();
     path.SetFillMode(Gdiplus::FillModeWinding);
 
     // --- handle bump ---
-    path.AddLine(10.47288f * s24, 5.52000f * s24, 13.52712f * s24, 5.52000f * s24);
+    // Contour 1: start (52.688,16.000) in source 128-unit space
+    path.AddLine(9.98505f * s24, 3.45000f * s24, 14.01495f * s24, 3.45000f * s24);
     path.AddBezier(
-        13.52712f * s24, 5.52000f * s24,
-        13.47082f * s24, 5.35692f * s24,
-        13.39212f * s24, 5.20923f * s24,
-        13.29087f * s24, 5.07706f * s24);
+        14.01495f * s24, 3.45000f * s24,
+        13.94067f * s24, 3.23483f * s24,
+        13.83682f * s24, 3.03996f * s24,
+        13.70323f * s24, 2.86557f * s24);
     path.AddBezier(
-        13.29087f * s24, 5.07706f * s24,
-        13.18962f * s24, 4.94476f * s24,
-        13.07163f * s24, 4.83096f * s24,
-        12.93663f * s24, 4.73538f * s24);
+        13.70323f * s24, 2.86557f * s24,
+        13.56964f * s24, 2.69101f * s24,
+        13.41396f * s24, 2.54085f * s24,
+        13.23583f * s24, 2.41474f * s24);
     path.AddBezier(
-        12.93663f * s24, 4.73538f * s24,
-        12.80163f * s24, 4.63967f * s24,
-        12.65542f * s24, 4.56663f * s24,
-        12.49788f * s24, 4.51600f * s24);
+        13.23583f * s24, 2.41474f * s24,
+        13.05771f * s24, 2.28845f * s24,
+        12.86480f * s24, 2.19208f * s24,
+        12.65693f * s24, 2.12528f * s24);
     path.AddBezier(
-        12.49788f * s24, 4.51600f * s24,
-        12.34020f * s24, 4.46538f * s24,
-        12.17428f * s24, 4.44000f * s24,
-        12.00014f * s24, 4.44000f * s24);
+        12.65693f * s24, 2.12528f * s24,
+        12.44888f * s24, 2.05849f * s24,
+        12.22996f * s24, 2.02500f * s24,
+        12.00018f * s24, 2.02500f * s24);
     path.AddBezier(
-        12.00014f * s24, 4.44000f * s24,
-        11.82572f * s24, 4.44000f * s24,
-        11.65980f * s24, 4.46538f * s24,
-        11.50212f * s24, 4.51600f * s24);
+        12.00018f * s24, 2.02500f * s24,
+        11.77004f * s24, 2.02500f * s24,
+        11.55112f * s24, 2.05849f * s24,
+        11.34307f * s24, 2.12528f * s24);
     path.AddBezier(
-        11.50212f * s24, 4.51600f * s24,
-        11.34458f * s24, 4.56663f * s24,
-        11.19837f * s24, 4.63967f * s24,
-        11.06337f * s24, 4.73538f * s24);
+        11.34307f * s24, 2.12528f * s24,
+        11.13520f * s24, 2.19208f * s24,
+        10.94229f * s24, 2.28845f * s24,
+        10.76417f * s24, 2.41474f * s24);
     path.AddBezier(
-        11.06337f * s24, 4.73538f * s24,
-        10.92837f * s24, 4.83096f * s24,
-        10.81038f * s24, 4.94476f * s24,
-        10.70913f * s24, 5.07706f * s24);
+        10.76417f * s24, 2.41474f * s24,
+        10.58604f * s24, 2.54085f * s24,
+        10.43036f * s24, 2.69101f * s24,
+        10.29677f * s24, 2.86557f * s24);
     path.AddBezier(
-        10.70913f * s24, 5.07706f * s24,
-        10.60788f * s24, 5.20923f * s24,
-        10.52918f * s24, 5.35692f * s24,
-        10.47288f * s24, 5.52000f * s24);
+        10.29677f * s24, 2.86557f * s24,
+        10.16318f * s24, 3.03996f * s24,
+        10.05933f * s24, 3.23483f * s24,
+        9.98505f * s24, 3.45000f * s24);
     path.CloseFigure(); // implicit close: end point equals start point
 
     // --- body opening (hole) ---
-    path.AddLine(17.87264f * s24, 6.60000f * s24, 6.12737f * s24, 6.60000f * s24);
-    path.AddLine(6.12737f * s24, 6.60000f * s24, 7.51125f * s24, 18.60663f * s24);
+    // Contour 2: start (107.501,24.000) in source 128-unit space
+    path.AddLine(19.74862f * s24, 4.87500f * s24, 4.25138f * s24, 4.87500f * s24);
+    path.AddLine(4.25138f * s24, 4.87500f * s24, 6.07734f * s24, 20.71708f * s24);
     path.AddBezier(
-        7.51125f * s24, 18.60663f * s24,
-        7.54500f * s24, 18.88783f * s24,
-        7.66164f * s24, 19.11707f * s24,
-        7.86131f * s24, 19.29418f * s24);
+        6.07734f * s24, 20.71708f * s24,
+        6.12188f * s24, 21.08812f * s24,
+        6.27578f * s24, 21.39057f * s24,
+        6.53922f * s24, 21.62427f * s24);
     path.AddBezier(
-        7.86131f * s24, 19.29418f * s24,
-        8.06110f * s24, 19.47144f * s24,
-        8.30167f * s24, 19.56000f * s24,
-        8.58288f * s24, 19.56000f * s24);
-    path.AddLine(8.58288f * s24, 19.56000f * s24, 15.41712f * s24, 19.56000f * s24);
+        6.53922f * s24, 21.62427f * s24,
+        6.80285f * s24, 21.85815f * s24,
+        7.12027f * s24, 21.97500f * s24,
+        7.49130f * s24, 21.97500f * s24);
+    path.AddLine(7.49130f * s24, 21.97500f * s24, 16.50870f * s24, 21.97500f * s24);
     path.AddBezier(
-        15.41712f * s24, 19.56000f * s24,
-        15.55212f * s24, 19.56000f * s24,
-        15.68145f * s24, 19.53610f * s24,
-        15.80538f * s24, 19.48832f * s24);
+        16.50870f * s24, 21.97500f * s24,
+        16.68682f * s24, 21.97500f * s24,
+        16.85747f * s24, 21.94347f * s24,
+        17.02099f * s24, 21.88042f * s24);
     path.AddBezier(
-        15.80538f * s24, 19.48832f * s24,
-        15.92918f * s24, 19.44039f * s24,
-        16.03866f * s24, 19.37438f * s24,
-        16.13451f * s24, 19.29000f * s24);
+        17.02099f * s24, 21.88042f * s24,
+        17.18433f * s24, 21.81718f * s24,
+        17.32879f * s24, 21.73008f * s24,
+        17.45526f * s24, 21.61875f * s24);
     path.AddBezier(
-        16.13451f * s24, 19.29000f * s24,
-        16.23009f * s24, 19.20562f * s24,
-        16.30866f * s24, 19.10438f * s24,
-        16.37076f * s24, 18.98625f * s24);
+        17.45526f * s24, 21.61875f * s24,
+        17.58137f * s24, 21.50742f * s24,
+        17.68504f * s24, 21.37383f * s24,
+        17.76698f * s24, 21.21797f * s24);
     path.AddBezier(
-        16.37076f * s24, 18.98625f * s24,
-        16.43259f * s24, 18.86812f * s24,
-        16.47201f * s24, 18.74163f * s24,
-        16.48889f * s24, 18.60663f * s24);
+        17.76698f * s24, 21.21797f * s24,
+        17.84856f * s24, 21.06211f * s24,
+        17.90057f * s24, 20.89521f * s24,
+        17.92283f * s24, 20.71708f * s24);
     path.CloseFigure();
 
     // --- outer silhouette ---
+    // Contour 3: start (124.001,20.000) in source 128-unit space
     path.AddBezier(
-        20.10014f * s24, 6.06000f * s24,
-        20.10014f * s24, 6.18380f * s24,
-        20.07610f * s24, 6.28221f * s24,
-        20.02831f * s24, 6.35525f * s24);
+        22.68768f * s24, 4.16250f * s24,
+        22.68768f * s24, 4.32584f * s24,
+        22.65597f * s24, 4.45569f * s24,
+        22.59292f * s24, 4.55206f * s24);
     path.AddBezier(
-        20.02831f * s24, 6.35525f * s24,
-        19.98053f * s24, 6.42842f * s24,
-        19.91708f * s24, 6.48323f * s24,
-        19.83837f * s24, 6.51981f * s24);
+        22.59292f * s24, 4.55206f * s24,
+        22.52986f * s24, 4.64860f * s24,
+        22.44614f * s24, 4.72092f * s24,
+        22.34229f * s24, 4.76919f * s24);
     path.AddBezier(
-        19.83837f * s24, 6.51981f * s24,
-        19.75980f * s24, 6.55640f * s24,
-        19.67259f * s24, 6.58029f * s24,
-        19.57701f * s24, 6.59150f * s24);
+        22.34229f * s24, 4.76919f * s24,
+        22.23862f * s24, 4.81747f * s24,
+        22.12356f * s24, 4.84899f * s24,
+        21.99744f * s24, 4.86378f * s24);
     path.AddBezier(
-        19.57701f * s24, 6.59150f * s24,
-        19.48116f * s24, 6.60284f * s24,
-        19.38288f * s24, 6.60851f * s24,
-        19.28163f * s24, 6.60851f * s24);
+        21.99744f * s24, 4.86378f * s24,
+        21.87098f * s24, 4.87874f * s24,
+        21.74130f * s24, 4.88622f * s24,
+        21.60771f * s24, 4.88622f * s24);
     path.AddBezier(
-        19.28163f * s24, 6.60851f * s24,
-        19.22520f * s24, 6.60851f * s24,
-        19.16917f * s24, 6.60702f * s24,
-        19.11288f * s24, 6.60418f * s24);
+        21.60771f * s24, 4.88622f * s24,
+        21.53325f * s24, 4.88622f * s24,
+        21.45933f * s24, 4.88426f * s24,
+        21.38505f * s24, 4.88052f * s24);
     path.AddBezier(
-        19.11288f * s24, 6.60418f * s24,
-        19.05645f * s24, 6.60135f * s24,
-        19.00583f * s24, 6.60000f * s24,
-        18.96087f * s24, 6.60000f * s24);
-    path.AddLine(18.96087f * s24, 6.60000f * s24, 17.56038f * s24, 18.72476f * s24);
+        21.38505f * s24, 4.88052f * s24,
+        21.31059f * s24, 4.87678f * s24,
+        21.24380f * s24, 4.87500f * s24,
+        21.18448f * s24, 4.87500f * s24);
+    path.AddLine(21.18448f * s24, 4.87500f * s24, 19.33661f * s24, 20.87294f * s24);
     path.AddBezier(
-        17.56038f * s24, 18.72476f * s24,
-        17.52663f * s24, 18.99476f * s24,
-        17.44792f * s24, 19.24639f * s24,
-        17.32413f * s24, 19.47981f * s24);
+        19.33661f * s24, 20.87294f * s24,
+        19.29208f * s24, 21.22919f * s24,
+        19.18823f * s24, 21.56122f * s24,
+        19.02489f * s24, 21.86919f * s24);
     path.AddBezier(
-        17.32413f * s24, 19.47981f * s24,
-        17.20020f * s24, 19.71323f * s24,
-        17.04293f * s24, 19.91573f * s24,
-        16.85163f * s24, 20.08731f * s24);
+        19.02489f * s24, 21.86919f * s24,
+        18.86137f * s24, 22.17717f * s24,
+        18.65386f * s24, 22.44436f * s24,
+        18.40146f * s24, 22.67076f * s24);
     path.AddBezier(
-        16.85163f * s24, 20.08731f * s24,
-        16.66020f * s24, 20.25890f * s24,
-        16.44083f * s24, 20.39390f * s24,
-        16.19337f * s24, 20.49231f * s24);
+        18.40146f * s24, 22.67076f * s24,
+        18.14888f * s24, 22.89715f * s24,
+        17.85942f * s24, 23.07528f * s24,
+        17.53292f * s24, 23.20513f * s24);
     path.AddBezier(
-        16.19337f * s24, 20.49231f * s24,
-        15.94605f * s24, 20.59072f * s24,
-        15.68712f * s24, 20.64000f * s24,
-        15.41712f * s24, 20.64000f * s24);
-    path.AddLine(15.41712f * s24, 20.64000f * s24, 8.58288f * s24, 20.64000f * s24);
+        17.53292f * s24, 23.20513f * s24,
+        17.20659f * s24, 23.33498f * s24,
+        16.86495f * s24, 23.40000f * s24,
+        16.50870f * s24, 23.40000f * s24);
+    path.AddLine(16.50870f * s24, 23.40000f * s24, 7.49130f * s24, 23.40000f * s24);
     path.AddBezier(
-        8.58288f * s24, 20.64000f * s24,
-        8.31288f * s24, 20.64000f * s24,
-        8.05395f * s24, 20.59072f * s24,
-        7.80663f * s24, 20.49231f * s24);
+        7.49130f * s24, 23.40000f * s24,
+        7.13505f * s24, 23.40000f * s24,
+        6.79341f * s24, 23.33498f * s24,
+        6.46708f * s24, 23.20513f * s24);
     path.AddBezier(
-        7.80663f * s24, 20.49231f * s24,
-        7.55917f * s24, 20.39390f * s24,
-        7.33980f * s24, 20.25890f * s24,
-        7.14837f * s24, 20.08731f * s24);
+        6.46708f * s24, 23.20513f * s24,
+        6.14058f * s24, 23.07528f * s24,
+        5.85113f * s24, 22.89715f * s24,
+        5.59854f * s24, 22.67076f * s24);
     path.AddBezier(
-        7.14837f * s24, 20.08731f * s24,
-        6.95708f * s24, 19.91573f * s24,
-        6.79980f * s24, 19.71323f * s24,
-        6.67587f * s24, 19.47981f * s24);
+        5.59854f * s24, 22.67076f * s24,
+        5.34614f * s24, 22.44436f * s24,
+        5.13863f * s24, 22.17717f * s24,
+        4.97511f * s24, 21.86919f * s24);
     path.AddBezier(
-        6.67587f * s24, 19.47981f * s24,
-        6.55208f * s24, 19.24639f * s24,
-        6.47337f * s24, 18.99476f * s24,
-        6.43962f * s24, 18.72476f * s24);
-    path.AddLine(6.43962f * s24, 18.72476f * s24, 5.03913f * s24, 6.60000f * s24);
+        4.97511f * s24, 21.86919f * s24,
+        4.81177f * s24, 21.56122f * s24,
+        4.70792f * s24, 21.22919f * s24,
+        4.66339f * s24, 20.87294f * s24);
+    path.AddLine(4.66339f * s24, 20.87294f * s24, 2.81552f * s24, 4.87500f * s24);
     path.AddBezier(
-        5.03913f * s24, 6.60000f * s24,
-        4.98270f * s24, 6.60000f * s24,
-        4.92668f * s24, 6.60135f * s24,
-        4.87038f * s24, 6.60418f * s24);
+        2.81552f * s24, 4.87500f * s24,
+        2.74106f * s24, 4.87500f * s24,
+        2.66714f * s24, 4.87678f * s24,
+        2.59286f * s24, 4.88052f * s24);
     path.AddBezier(
-        4.87038f * s24, 6.60418f * s24,
-        4.81395f * s24, 6.60702f * s24,
-        4.75793f * s24, 6.60851f * s24,
-        4.70163f * s24, 6.60851f * s24);
+        2.59286f * s24, 4.88052f * s24,
+        2.51841f * s24, 4.88426f * s24,
+        2.44448f * s24, 4.88622f * s24,
+        2.37021f * s24, 4.88622f * s24);
     path.AddBezier(
-        4.70163f * s24, 6.60851f * s24,
-        4.60605f * s24, 6.60851f * s24,
-        4.51020f * s24, 6.60284f * s24,
-        4.41462f * s24, 6.59150f * s24);
+        2.37021f * s24, 4.88622f * s24,
+        2.24409f * s24, 4.88622f * s24,
+        2.11763f * s24, 4.87874f * s24,
+        1.99151f * s24, 4.86378f * s24);
     path.AddBezier(
-        4.41462f * s24, 6.59150f * s24,
-        4.31918f * s24, 6.58029f * s24,
-        4.23318f * s24, 6.55505f * s24,
-        4.15745f * s24, 6.51562f * s24);
+        1.99151f * s24, 4.86378f * s24,
+        1.86558f * s24, 4.84899f * s24,
+        1.75211f * s24, 4.81568f * s24,
+        1.65218f * s24, 4.76367f * s24);
     path.AddBezier(
-        4.15745f * s24, 6.51562f * s24,
-        4.08131f * s24, 6.47621f * s24,
-        4.01961f * s24, 6.42005f * s24,
-        3.97182f * s24, 6.34687f * s24);
+        1.65218f * s24, 4.76367f * s24,
+        1.55172f * s24, 4.71166f * s24,
+        1.47032f * s24, 4.63756f * s24,
+        1.40726f * s24, 4.54102f * s24);
     path.AddBezier(
-        3.97182f * s24, 6.34687f * s24,
-        3.92403f * s24, 6.27370f * s24,
-        3.89987f * s24, 6.17813f * s24,
-        3.89987f * s24, 6.06000f * s24);
+        1.40726f * s24, 4.54102f * s24,
+        1.34421f * s24, 4.44447f * s24,
+        1.31232f * s24, 4.31836f * s24,
+        1.31232f * s24, 4.16250f * s24);
     path.AddBezier(
-        3.89987f * s24, 6.06000f * s24,
-        3.89987f * s24, 5.91380f * s24,
-        3.95332f * s24, 5.78717f * s24,
-        4.06038f * s24, 5.68025f * s24);
+        1.31232f * s24, 4.16250f * s24,
+        1.31232f * s24, 3.96959f * s24,
+        1.38286f * s24, 3.80251f * s24,
+        1.52411f * s24, 3.66143f * s24);
     path.AddBezier(
-        4.06038f * s24, 5.68025f * s24,
-        4.16730f * s24, 5.57346f * s24,
-        4.29366f * s24, 5.52000f * s24,
-        4.43987f * s24, 5.52000f * s24);
-    path.AddLine(4.43987f * s24, 5.52000f * s24, 9.35049f * s24, 5.52000f * s24);
+        1.52411f * s24, 3.66143f * s24,
+        1.66519f * s24, 3.52054f * s24,
+        1.83191f * s24, 3.45000f * s24,
+        2.02482f * s24, 3.45000f * s24);
+    path.AddLine(2.02482f * s24, 3.45000f * s24, 8.50412f * s24, 3.45000f * s24);
     path.AddBezier(
-        9.35049f * s24, 5.52000f * s24,
-        9.40678f * s24, 5.21058f * s24,
-        9.51789f * s24, 4.92370f * s24,
-        9.68380f * s24, 4.65938f * s24);
+        8.50412f * s24, 3.45000f * s24,
+        8.57840f * s24, 3.04174f * s24,
+        8.72499f * s24, 2.66322f * s24,
+        8.94391f * s24, 2.31445f * s24);
     path.AddBezier(
-        9.68380f * s24, 4.65938f * s24,
-        9.84999f * s24, 4.39505f * s24,
-        10.05249f * s24, 4.16582f * s24,
-        10.29130f * s24, 3.97168f * s24);
+        8.94391f * s24, 2.31445f * s24,
+        9.16318f * s24, 1.96568f * s24,
+        9.43037f * s24, 1.66323f * s24,
+        9.74547f * s24, 1.40708f * s24);
     path.AddBezier(
-        10.29130f * s24, 3.97168f * s24,
-        10.53039f * s24, 3.77769f * s24,
-        10.79634f * s24, 3.62717f * s24,
-        11.08862f * s24, 3.52025f * s24);
+        9.74547f * s24, 1.40708f * s24,
+        10.06093f * s24, 1.15112f * s24,
+        10.41184f * s24, 0.95251f * s24,
+        10.79748f * s24, 0.81143f * s24);
     path.AddBezier(
-        11.08862f * s24, 3.52025f * s24,
-        11.38116f * s24, 3.41346f * s24,
-        11.68491f * s24, 3.36000f * s24,
-        12.00014f * s24, 3.36000f * s24);
+        10.79748f * s24, 0.81143f * s24,
+        11.18347f * s24, 0.67054f * s24,
+        11.58426f * s24, 0.60000f * s24,
+        12.00018f * s24, 0.60000f * s24);
     path.AddBezier(
-        12.00014f * s24, 3.36000f * s24,
-        12.31509f * s24, 3.36000f * s24,
-        12.61884f * s24, 3.41346f * s24,
-        12.91111f * s24, 3.52025f * s24);
+        12.00018f * s24, 0.60000f * s24,
+        12.41574f * s24, 0.60000f * s24,
+        12.81653f * s24, 0.67054f * s24,
+        13.20217f * s24, 0.81143f * s24);
     path.AddBezier(
-        12.91111f * s24, 3.52025f * s24,
-        13.20366f * s24, 3.62717f * s24,
-        13.46961f * s24, 3.77769f * s24,
-        13.70856f * s24, 3.97168f * s24);
+        13.20217f * s24, 0.81143f * s24,
+        13.58816f * s24, 0.95251f * s24,
+        13.93907f * s24, 1.15112f * s24,
+        14.25435f * s24, 1.40708f * s24);
     path.AddBezier(
-        13.70856f * s24, 3.97168f * s24,
-        13.94764f * s24, 4.16582f * s24,
-        14.15015f * s24, 4.39505f * s24,
-        14.31606f * s24, 4.65938f * s24);
+        14.25435f * s24, 1.40708f * s24,
+        14.56981f * s24, 1.66323f * s24,
+        14.83700f * s24, 1.96568f * s24,
+        15.05591f * s24, 2.31445f * s24);
     path.AddBezier(
-        14.31606f * s24, 4.65938f * s24,
-        14.48211f * s24, 4.92370f * s24,
-        14.59322f * s24, 5.21058f * s24,
-        14.64924f * s24, 5.52000f * s24);
-    path.AddLine(14.64924f * s24, 5.52000f * s24, 19.56014f * s24, 5.52000f * s24);
+        15.05591f * s24, 2.31445f * s24,
+        15.27501f * s24, 2.66322f * s24,
+        15.42160f * s24, 3.04174f * s24,
+        15.49552f * s24, 3.45000f * s24);
+    path.AddLine(15.49552f * s24, 3.45000f * s24, 21.97518f * s24, 3.45000f * s24);
     path.AddBezier(
-        19.56014f * s24, 5.52000f * s24,
-        19.70634f * s24, 5.52000f * s24,
-        19.83270f * s24, 5.57346f * s24,
-        19.93962f * s24, 5.68025f * s24);
+        21.97518f * s24, 3.45000f * s24,
+        22.16809f * s24, 3.45000f * s24,
+        22.33481f * s24, 3.52054f * s24,
+        22.47589f * s24, 3.66143f * s24);
     path.AddBezier(
-        19.93962f * s24, 5.68025f * s24,
-        20.04668f * s24, 5.78717f * s24,
-        20.10014f * s24, 5.91380f * s24,
-        20.10014f * s24, 6.06000f * s24);
+        22.47589f * s24, 3.66143f * s24,
+        22.61714f * s24, 3.80251f * s24,
+        22.68768f * s24, 3.96959f * s24,
+        22.68768f * s24, 4.16250f * s24);
     path.CloseFigure();
+
 }
 
-// Same three contours as the empty state (identical body/handle/hole, so the
-// silhouette doesn't shift between states) plus a fourth contour: the visible
-// trash content, filled inside the body opening using the same winding
-// direction as the hole itself so it re-fills that local area only.
-static void BuildBodyPath_Minibin_Full(Gdiplus::GraphicsPath& path, float s24) {
+static void BuildBodyPath_Style4_Full(Gdiplus::GraphicsPath& path, float s24) {
     path.Reset();
     path.SetFillMode(Gdiplus::FillModeWinding);
 
     // --- handle bump ---
-    path.AddLine(10.47288f * s24, 5.52000f * s24, 13.52712f * s24, 5.52000f * s24);
+    // Contour 1: start (52.688,16.000) in source 128-unit space
+    path.AddLine(9.98505f * s24, 3.45000f * s24, 14.01495f * s24, 3.45000f * s24);
     path.AddBezier(
-        13.52712f * s24, 5.52000f * s24,
-        13.47082f * s24, 5.35692f * s24,
-        13.39212f * s24, 5.20923f * s24,
-        13.29087f * s24, 5.07706f * s24);
+        14.01495f * s24, 3.45000f * s24,
+        13.94067f * s24, 3.23483f * s24,
+        13.83682f * s24, 3.03996f * s24,
+        13.70323f * s24, 2.86557f * s24);
     path.AddBezier(
-        13.29087f * s24, 5.07706f * s24,
-        13.18962f * s24, 4.94476f * s24,
-        13.07163f * s24, 4.83096f * s24,
-        12.93663f * s24, 4.73538f * s24);
+        13.70323f * s24, 2.86557f * s24,
+        13.56964f * s24, 2.69101f * s24,
+        13.41396f * s24, 2.54085f * s24,
+        13.23583f * s24, 2.41474f * s24);
     path.AddBezier(
-        12.93663f * s24, 4.73538f * s24,
-        12.80163f * s24, 4.63967f * s24,
-        12.65542f * s24, 4.56663f * s24,
-        12.49788f * s24, 4.51600f * s24);
+        13.23583f * s24, 2.41474f * s24,
+        13.05771f * s24, 2.28845f * s24,
+        12.86480f * s24, 2.19208f * s24,
+        12.65693f * s24, 2.12528f * s24);
     path.AddBezier(
-        12.49788f * s24, 4.51600f * s24,
-        12.34020f * s24, 4.46538f * s24,
-        12.17428f * s24, 4.44000f * s24,
-        12.00014f * s24, 4.44000f * s24);
+        12.65693f * s24, 2.12528f * s24,
+        12.44888f * s24, 2.05849f * s24,
+        12.22996f * s24, 2.02500f * s24,
+        12.00018f * s24, 2.02500f * s24);
     path.AddBezier(
-        12.00014f * s24, 4.44000f * s24,
-        11.82572f * s24, 4.44000f * s24,
-        11.65980f * s24, 4.46538f * s24,
-        11.50212f * s24, 4.51600f * s24);
+        12.00018f * s24, 2.02500f * s24,
+        11.77004f * s24, 2.02500f * s24,
+        11.55112f * s24, 2.05849f * s24,
+        11.34307f * s24, 2.12528f * s24);
     path.AddBezier(
-        11.50212f * s24, 4.51600f * s24,
-        11.34458f * s24, 4.56663f * s24,
-        11.19837f * s24, 4.63967f * s24,
-        11.06337f * s24, 4.73538f * s24);
+        11.34307f * s24, 2.12528f * s24,
+        11.13520f * s24, 2.19208f * s24,
+        10.94229f * s24, 2.28845f * s24,
+        10.76417f * s24, 2.41474f * s24);
     path.AddBezier(
-        11.06337f * s24, 4.73538f * s24,
-        10.92837f * s24, 4.83096f * s24,
-        10.81038f * s24, 4.94476f * s24,
-        10.70913f * s24, 5.07706f * s24);
+        10.76417f * s24, 2.41474f * s24,
+        10.58604f * s24, 2.54085f * s24,
+        10.43036f * s24, 2.69101f * s24,
+        10.29677f * s24, 2.86557f * s24);
     path.AddBezier(
-        10.70913f * s24, 5.07706f * s24,
-        10.60788f * s24, 5.20923f * s24,
-        10.52918f * s24, 5.35692f * s24,
-        10.47288f * s24, 5.52000f * s24);
+        10.29677f * s24, 2.86557f * s24,
+        10.16318f * s24, 3.03996f * s24,
+        10.05933f * s24, 3.23483f * s24,
+        9.98505f * s24, 3.45000f * s24);
     path.CloseFigure(); // implicit close: end point equals start point
 
     // --- body opening (hole) ---
-    path.AddLine(17.87264f * s24, 6.60000f * s24, 6.12737f * s24, 6.60000f * s24);
-    path.AddLine(6.12737f * s24, 6.60000f * s24, 7.51125f * s24, 18.60663f * s24);
+    // Contour 2: start (107.501,24.000) in source 128-unit space
+    path.AddLine(19.74862f * s24, 4.87500f * s24, 4.25138f * s24, 4.87500f * s24);
+    path.AddLine(4.25138f * s24, 4.87500f * s24, 6.07734f * s24, 20.71708f * s24);
     path.AddBezier(
-        7.51125f * s24, 18.60663f * s24,
-        7.54500f * s24, 18.88783f * s24,
-        7.66164f * s24, 19.11707f * s24,
-        7.86131f * s24, 19.29418f * s24);
+        6.07734f * s24, 20.71708f * s24,
+        6.12188f * s24, 21.08812f * s24,
+        6.27578f * s24, 21.39057f * s24,
+        6.53922f * s24, 21.62427f * s24);
     path.AddBezier(
-        7.86131f * s24, 19.29418f * s24,
-        8.06110f * s24, 19.47144f * s24,
-        8.30167f * s24, 19.56000f * s24,
-        8.58288f * s24, 19.56000f * s24);
-    path.AddLine(8.58288f * s24, 19.56000f * s24, 15.41712f * s24, 19.56000f * s24);
+        6.53922f * s24, 21.62427f * s24,
+        6.80285f * s24, 21.85815f * s24,
+        7.12027f * s24, 21.97500f * s24,
+        7.49130f * s24, 21.97500f * s24);
+    path.AddLine(7.49130f * s24, 21.97500f * s24, 16.50870f * s24, 21.97500f * s24);
     path.AddBezier(
-        15.41712f * s24, 19.56000f * s24,
-        15.55212f * s24, 19.56000f * s24,
-        15.68145f * s24, 19.53610f * s24,
-        15.80538f * s24, 19.48832f * s24);
+        16.50870f * s24, 21.97500f * s24,
+        16.68682f * s24, 21.97500f * s24,
+        16.85747f * s24, 21.94347f * s24,
+        17.02099f * s24, 21.88042f * s24);
     path.AddBezier(
-        15.80538f * s24, 19.48832f * s24,
-        15.92918f * s24, 19.44039f * s24,
-        16.03866f * s24, 19.37438f * s24,
-        16.13451f * s24, 19.29000f * s24);
+        17.02099f * s24, 21.88042f * s24,
+        17.18433f * s24, 21.81718f * s24,
+        17.32879f * s24, 21.73008f * s24,
+        17.45526f * s24, 21.61875f * s24);
     path.AddBezier(
-        16.13451f * s24, 19.29000f * s24,
-        16.23009f * s24, 19.20562f * s24,
-        16.30866f * s24, 19.10438f * s24,
-        16.37076f * s24, 18.98625f * s24);
+        17.45526f * s24, 21.61875f * s24,
+        17.58137f * s24, 21.50742f * s24,
+        17.68504f * s24, 21.37383f * s24,
+        17.76698f * s24, 21.21797f * s24);
     path.AddBezier(
-        16.37076f * s24, 18.98625f * s24,
-        16.43259f * s24, 18.86812f * s24,
-        16.47201f * s24, 18.74163f * s24,
-        16.48889f * s24, 18.60663f * s24);
+        17.76698f * s24, 21.21797f * s24,
+        17.84856f * s24, 21.06211f * s24,
+        17.90057f * s24, 20.89521f * s24,
+        17.92283f * s24, 20.71708f * s24);
     path.CloseFigure();
 
     // --- outer silhouette ---
+    // Contour 3: start (124.001,20.000) in source 128-unit space
     path.AddBezier(
-        20.10014f * s24, 6.06000f * s24,
-        20.10014f * s24, 6.18380f * s24,
-        20.07610f * s24, 6.28221f * s24,
-        20.02831f * s24, 6.35525f * s24);
+        22.68768f * s24, 4.16250f * s24,
+        22.68768f * s24, 4.32584f * s24,
+        22.65597f * s24, 4.45569f * s24,
+        22.59292f * s24, 4.55206f * s24);
     path.AddBezier(
-        20.02831f * s24, 6.35525f * s24,
-        19.98053f * s24, 6.42842f * s24,
-        19.91708f * s24, 6.48323f * s24,
-        19.83837f * s24, 6.51981f * s24);
+        22.59292f * s24, 4.55206f * s24,
+        22.52986f * s24, 4.64860f * s24,
+        22.44614f * s24, 4.72092f * s24,
+        22.34229f * s24, 4.76919f * s24);
     path.AddBezier(
-        19.83837f * s24, 6.51981f * s24,
-        19.75980f * s24, 6.55640f * s24,
-        19.67259f * s24, 6.58029f * s24,
-        19.57701f * s24, 6.59150f * s24);
+        22.34229f * s24, 4.76919f * s24,
+        22.23862f * s24, 4.81747f * s24,
+        22.12356f * s24, 4.84899f * s24,
+        21.99744f * s24, 4.86378f * s24);
     path.AddBezier(
-        19.57701f * s24, 6.59150f * s24,
-        19.48116f * s24, 6.60284f * s24,
-        19.38288f * s24, 6.60851f * s24,
-        19.28163f * s24, 6.60851f * s24);
+        21.99744f * s24, 4.86378f * s24,
+        21.87098f * s24, 4.87874f * s24,
+        21.74130f * s24, 4.88622f * s24,
+        21.60771f * s24, 4.88622f * s24);
     path.AddBezier(
-        19.28163f * s24, 6.60851f * s24,
-        19.22520f * s24, 6.60851f * s24,
-        19.16917f * s24, 6.60702f * s24,
-        19.11288f * s24, 6.60418f * s24);
+        21.60771f * s24, 4.88622f * s24,
+        21.53325f * s24, 4.88622f * s24,
+        21.45933f * s24, 4.88426f * s24,
+        21.38505f * s24, 4.88052f * s24);
     path.AddBezier(
-        19.11288f * s24, 6.60418f * s24,
-        19.05645f * s24, 6.60135f * s24,
-        19.00583f * s24, 6.60000f * s24,
-        18.96087f * s24, 6.60000f * s24);
-    path.AddLine(18.96087f * s24, 6.60000f * s24, 17.56038f * s24, 18.72476f * s24);
+        21.38505f * s24, 4.88052f * s24,
+        21.31059f * s24, 4.87678f * s24,
+        21.24380f * s24, 4.87500f * s24,
+        21.18448f * s24, 4.87500f * s24);
+    path.AddLine(21.18448f * s24, 4.87500f * s24, 19.33661f * s24, 20.87294f * s24);
     path.AddBezier(
-        17.56038f * s24, 18.72476f * s24,
-        17.52663f * s24, 18.99476f * s24,
-        17.44792f * s24, 19.24639f * s24,
-        17.32413f * s24, 19.47981f * s24);
+        19.33661f * s24, 20.87294f * s24,
+        19.29208f * s24, 21.22919f * s24,
+        19.18823f * s24, 21.56122f * s24,
+        19.02489f * s24, 21.86919f * s24);
     path.AddBezier(
-        17.32413f * s24, 19.47981f * s24,
-        17.20020f * s24, 19.71336f * s24,
-        17.04293f * s24, 19.91586f * s24,
-        16.85163f * s24, 20.08731f * s24);
+        19.02489f * s24, 21.86919f * s24,
+        18.86137f * s24, 22.17735f * s24,
+        18.65386f * s24, 22.44454f * s24,
+        18.40146f * s24, 22.67076f * s24);
     path.AddBezier(
-        16.85163f * s24, 20.08731f * s24,
-        16.66020f * s24, 20.25890f * s24,
-        16.44083f * s24, 20.39390f * s24,
-        16.19337f * s24, 20.49231f * s24);
+        18.40146f * s24, 22.67076f * s24,
+        18.14888f * s24, 22.89715f * s24,
+        17.85942f * s24, 23.07528f * s24,
+        17.53292f * s24, 23.20513f * s24);
     path.AddBezier(
-        16.19337f * s24, 20.49231f * s24,
-        15.94605f * s24, 20.59086f * s24,
-        15.68712f * s24, 20.64000f * s24,
-        15.41712f * s24, 20.64000f * s24);
-    path.AddLine(15.41712f * s24, 20.64000f * s24, 8.58288f * s24, 20.64000f * s24);
+        17.53292f * s24, 23.20513f * s24,
+        17.20659f * s24, 23.33516f * s24,
+        16.86495f * s24, 23.40000f * s24,
+        16.50870f * s24, 23.40000f * s24);
+    path.AddLine(16.50870f * s24, 23.40000f * s24, 7.49130f * s24, 23.40000f * s24);
     path.AddBezier(
-        8.58288f * s24, 20.64000f * s24,
-        8.31288f * s24, 20.64000f * s24,
-        8.05395f * s24, 20.59086f * s24,
-        7.80663f * s24, 20.49231f * s24);
+        7.49130f * s24, 23.40000f * s24,
+        7.13505f * s24, 23.40000f * s24,
+        6.79341f * s24, 23.33516f * s24,
+        6.46708f * s24, 23.20513f * s24);
     path.AddBezier(
-        7.80663f * s24, 20.49231f * s24,
-        7.55917f * s24, 20.39390f * s24,
-        7.33980f * s24, 20.25890f * s24,
-        7.14837f * s24, 20.08731f * s24);
+        6.46708f * s24, 23.20513f * s24,
+        6.14058f * s24, 23.07528f * s24,
+        5.85113f * s24, 22.89715f * s24,
+        5.59854f * s24, 22.67076f * s24);
     path.AddBezier(
-        7.14837f * s24, 20.08731f * s24,
-        6.95708f * s24, 19.91586f * s24,
-        6.79980f * s24, 19.71336f * s24,
-        6.67587f * s24, 19.47981f * s24);
+        5.59854f * s24, 22.67076f * s24,
+        5.34614f * s24, 22.44454f * s24,
+        5.13863f * s24, 22.17735f * s24,
+        4.97511f * s24, 21.86919f * s24);
     path.AddBezier(
-        6.67587f * s24, 19.47981f * s24,
-        6.55208f * s24, 19.24639f * s24,
-        6.47337f * s24, 18.99476f * s24,
-        6.43962f * s24, 18.72476f * s24);
-    path.AddLine(6.43962f * s24, 18.72476f * s24, 5.03913f * s24, 6.60000f * s24);
+        4.97511f * s24, 21.86919f * s24,
+        4.81177f * s24, 21.56122f * s24,
+        4.70792f * s24, 21.22919f * s24,
+        4.66339f * s24, 20.87294f * s24);
+    path.AddLine(4.66339f * s24, 20.87294f * s24, 2.81552f * s24, 4.87500f * s24);
     path.AddBezier(
-        5.03913f * s24, 6.60000f * s24,
-        4.98270f * s24, 6.60000f * s24,
-        4.92668f * s24, 6.60135f * s24,
-        4.87038f * s24, 6.60418f * s24);
+        2.81552f * s24, 4.87500f * s24,
+        2.74106f * s24, 4.87500f * s24,
+        2.66714f * s24, 4.87678f * s24,
+        2.59286f * s24, 4.88052f * s24);
     path.AddBezier(
-        4.87038f * s24, 6.60418f * s24,
-        4.81395f * s24, 6.60702f * s24,
-        4.75793f * s24, 6.60851f * s24,
-        4.70163f * s24, 6.60851f * s24);
+        2.59286f * s24, 4.88052f * s24,
+        2.51841f * s24, 4.88426f * s24,
+        2.44448f * s24, 4.88622f * s24,
+        2.37021f * s24, 4.88622f * s24);
     path.AddBezier(
-        4.70163f * s24, 6.60851f * s24,
-        4.60605f * s24, 6.60851f * s24,
-        4.51020f * s24, 6.60284f * s24,
-        4.41462f * s24, 6.59150f * s24);
+        2.37021f * s24, 4.88622f * s24,
+        2.24409f * s24, 4.88622f * s24,
+        2.11763f * s24, 4.87874f * s24,
+        1.99151f * s24, 4.86378f * s24);
     path.AddBezier(
-        4.41462f * s24, 6.59150f * s24,
-        4.31918f * s24, 6.58029f * s24,
-        4.23318f * s24, 6.55505f * s24,
-        4.15745f * s24, 6.51562f * s24);
+        1.99151f * s24, 4.86378f * s24,
+        1.86558f * s24, 4.84899f * s24,
+        1.75211f * s24, 4.81568f * s24,
+        1.65218f * s24, 4.76367f * s24);
     path.AddBezier(
-        4.15745f * s24, 6.51562f * s24,
-        4.08131f * s24, 6.47621f * s24,
-        4.01961f * s24, 6.42005f * s24,
-        3.97182f * s24, 6.34687f * s24);
+        1.65218f * s24, 4.76367f * s24,
+        1.55172f * s24, 4.71166f * s24,
+        1.47032f * s24, 4.63756f * s24,
+        1.40726f * s24, 4.54102f * s24);
     path.AddBezier(
-        3.97182f * s24, 6.34687f * s24,
-        3.92403f * s24, 6.27370f * s24,
-        3.89987f * s24, 6.17813f * s24,
-        3.89987f * s24, 6.06000f * s24);
+        1.40726f * s24, 4.54102f * s24,
+        1.34421f * s24, 4.44447f * s24,
+        1.31232f * s24, 4.31836f * s24,
+        1.31232f * s24, 4.16250f * s24);
     path.AddBezier(
-        3.89987f * s24, 6.06000f * s24,
-        3.89987f * s24, 5.91380f * s24,
-        3.95332f * s24, 5.78717f * s24,
-        4.06038f * s24, 5.68025f * s24);
+        1.31232f * s24, 4.16250f * s24,
+        1.31232f * s24, 3.96959f * s24,
+        1.38286f * s24, 3.80251f * s24,
+        1.52411f * s24, 3.66143f * s24);
     path.AddBezier(
-        4.06038f * s24, 5.68025f * s24,
-        4.16730f * s24, 5.57346f * s24,
-        4.29366f * s24, 5.52000f * s24,
-        4.43987f * s24, 5.52000f * s24);
-    path.AddLine(4.43987f * s24, 5.52000f * s24, 9.35049f * s24, 5.52000f * s24);
+        1.52411f * s24, 3.66143f * s24,
+        1.66519f * s24, 3.52054f * s24,
+        1.83191f * s24, 3.45000f * s24,
+        2.02482f * s24, 3.45000f * s24);
+    path.AddLine(2.02482f * s24, 3.45000f * s24, 8.50412f * s24, 3.45000f * s24);
     path.AddBezier(
-        9.35049f * s24, 5.52000f * s24,
-        9.40678f * s24, 5.21058f * s24,
-        9.51789f * s24, 4.92370f * s24,
-        9.68380f * s24, 4.65938f * s24);
+        8.50412f * s24, 3.45000f * s24,
+        8.57840f * s24, 3.04174f * s24,
+        8.72499f * s24, 2.66322f * s24,
+        8.94391f * s24, 2.31445f * s24);
     path.AddBezier(
-        9.68380f * s24, 4.65938f * s24,
-        9.84999f * s24, 4.39505f * s24,
-        10.05249f * s24, 4.16582f * s24,
-        10.29130f * s24, 3.97168f * s24);
+        8.94391f * s24, 2.31445f * s24,
+        9.16318f * s24, 1.96568f * s24,
+        9.43037f * s24, 1.66323f * s24,
+        9.74547f * s24, 1.40708f * s24);
     path.AddBezier(
-        10.29130f * s24, 3.97168f * s24,
-        10.53039f * s24, 3.77769f * s24,
-        10.79634f * s24, 3.62717f * s24,
-        11.08862f * s24, 3.52025f * s24);
+        9.74547f * s24, 1.40708f * s24,
+        10.06093f * s24, 1.15112f * s24,
+        10.41184f * s24, 0.95251f * s24,
+        10.79748f * s24, 0.81143f * s24);
     path.AddBezier(
-        11.08862f * s24, 3.52025f * s24,
-        11.38116f * s24, 3.41346f * s24,
-        11.68491f * s24, 3.36000f * s24,
-        12.00014f * s24, 3.36000f * s24);
+        10.79748f * s24, 0.81143f * s24,
+        11.18347f * s24, 0.67054f * s24,
+        11.58426f * s24, 0.60000f * s24,
+        12.00018f * s24, 0.60000f * s24);
     path.AddBezier(
-        12.00014f * s24, 3.36000f * s24,
-        12.31509f * s24, 3.36000f * s24,
-        12.61884f * s24, 3.41346f * s24,
-        12.91111f * s24, 3.52025f * s24);
+        12.00018f * s24, 0.60000f * s24,
+        12.41574f * s24, 0.60000f * s24,
+        12.81653f * s24, 0.67054f * s24,
+        13.20217f * s24, 0.81143f * s24);
     path.AddBezier(
-        12.91111f * s24, 3.52025f * s24,
-        13.20366f * s24, 3.62717f * s24,
-        13.46961f * s24, 3.77769f * s24,
-        13.70856f * s24, 3.97168f * s24);
+        13.20217f * s24, 0.81143f * s24,
+        13.58816f * s24, 0.95251f * s24,
+        13.93907f * s24, 1.15112f * s24,
+        14.25435f * s24, 1.40708f * s24);
     path.AddBezier(
-        13.70856f * s24, 3.97168f * s24,
-        13.94764f * s24, 4.16582f * s24,
-        14.15015f * s24, 4.39505f * s24,
-        14.31606f * s24, 4.65938f * s24);
+        14.25435f * s24, 1.40708f * s24,
+        14.56981f * s24, 1.66323f * s24,
+        14.83700f * s24, 1.96568f * s24,
+        15.05591f * s24, 2.31445f * s24);
     path.AddBezier(
-        14.31606f * s24, 4.65938f * s24,
-        14.48211f * s24, 4.92370f * s24,
-        14.59322f * s24, 5.21058f * s24,
-        14.64924f * s24, 5.52000f * s24);
-    path.AddLine(14.64924f * s24, 5.52000f * s24, 19.56014f * s24, 5.52000f * s24);
+        15.05591f * s24, 2.31445f * s24,
+        15.27501f * s24, 2.66322f * s24,
+        15.42160f * s24, 3.04174f * s24,
+        15.49552f * s24, 3.45000f * s24);
+    path.AddLine(15.49552f * s24, 3.45000f * s24, 21.97518f * s24, 3.45000f * s24);
     path.AddBezier(
-        19.56014f * s24, 5.52000f * s24,
-        19.70634f * s24, 5.52000f * s24,
-        19.83270f * s24, 5.57346f * s24,
-        19.93962f * s24, 5.68025f * s24);
+        21.97518f * s24, 3.45000f * s24,
+        22.16809f * s24, 3.45000f * s24,
+        22.33481f * s24, 3.52054f * s24,
+        22.47589f * s24, 3.66143f * s24);
     path.AddBezier(
-        19.93962f * s24, 5.68025f * s24,
-        20.04668f * s24, 5.78717f * s24,
-        20.10014f * s24, 5.91380f * s24,
-        20.10014f * s24, 6.06000f * s24);
+        22.47589f * s24, 3.66143f * s24,
+        22.61714f * s24, 3.80251f * s24,
+        22.68768f * s24, 3.96959f * s24,
+        22.68768f * s24, 4.16250f * s24);
     path.CloseFigure();
 
     // --- contents fill ---
+    // Contour 4: start (90.079,112.855) in source 128-unit space
     path.AddBezier(
-        15.52066f * s24, 18.59542f * s24,
-        15.52796f * s24, 18.58908f * s24,
-        15.53754f * s24, 18.57896f * s24,
-        15.54969f * s24, 18.55641f * s24);
+        16.64532f * s24, 20.70230f * s24,
+        16.65494f * s24, 20.69393f * s24,
+        16.66759f * s24, 20.68057f * s24,
+        16.68362f * s24, 20.65082f * s24);
     path.AddBezier(
-        15.54969f * s24, 18.55641f * s24,
-        15.55995f * s24, 18.53616f * s24,
-        15.56616f * s24, 18.51604f * s24,
-        15.56805f * s24, 18.50038f * s24);
-    path.AddLine(15.56805f * s24, 18.50038f * s24, 16.19283f * s24, 13.08000f * s24);
-    path.AddLine(16.19283f * s24, 13.08000f * s24, 7.80717f * s24, 13.08000f * s24);
-    path.AddLine(7.80717f * s24, 13.08000f * s24, 8.43141f * s24, 18.49593f * s24);
+        16.68362f * s24, 20.65082f * s24,
+        16.69716f * s24, 20.62410f * s24,
+        16.70535f * s24, 20.59756f * s24,
+        16.70784f * s24, 20.57690f * s24);
+    path.AddLine(16.70784f * s24, 20.57690f * s24, 17.53221f * s24, 13.42500f * s24);
+    path.AddLine(17.53221f * s24, 13.42500f * s24, 6.46779f * s24, 13.42500f * s24);
+    path.AddLine(6.46779f * s24, 13.42500f * s24, 7.29144f * s24, 20.57102f * s24);
     path.AddBezier(
-        8.43141f * s24, 18.49593f * s24,
-        8.44005f * s24, 18.56856f * s24,
-        8.45881f * s24, 18.58503f * s24,
-        8.47637f * s24, 18.60069f * s24);
+        7.29144f * s24, 20.57102f * s24,
+        7.30284f * s24, 20.66685f * s24,
+        7.32760f * s24, 20.68858f * s24,
+        7.35076f * s24, 20.70924f * s24);
     path.AddBezier(
-        8.47637f * s24, 18.60069f * s24,
-        8.49499f * s24, 18.61729f * s24,
-        8.51281f * s24, 18.63295f * s24,
-        8.58288f * s24, 18.63295f * s24);
-    path.AddLine(8.58288f * s24, 18.63295f * s24, 15.41712f * s24, 18.63295f * s24);
+        7.35076f * s24, 20.70924f * s24,
+        7.37534f * s24, 20.73115f * s24,
+        7.39885f * s24, 20.75182f * s24,
+        7.49130f * s24, 20.75182f * s24);
+    path.AddLine(7.49130f * s24, 20.75182f * s24, 16.50870f * s24, 20.75182f * s24);
     path.AddBezier(
-        15.41712f * s24, 18.63295f * s24,
-        15.43805f * s24, 18.63295f * s24,
-        15.45397f * s24, 18.63039f * s24,
-        15.47180f * s24, 18.62364f * s24);
+        16.50870f * s24, 20.75182f * s24,
+        16.53631f * s24, 20.75182f * s24,
+        16.55733f * s24, 20.74843f * s24,
+        16.58084f * s24, 20.73953f * s24);
     path.AddBezier(
-        15.47180f * s24, 18.62364f * s24,
-        15.49866f * s24, 18.61311f * s24,
-        15.51257f * s24, 18.60271f * s24,
-        15.52066f * s24, 18.59542f * s24);
+        16.58084f * s24, 20.73953f * s24,
+        16.61629f * s24, 20.72563f * s24,
+        16.63463f * s24, 20.71192f * s24,
+        16.64532f * s24, 20.70230f * s24);
     path.CloseFigure();
+
 }
 
 HICON CreateVectorTrashIcon(int iconSize, bool isEmpty, bool isDarkTheme, std::wstring_view vectorStyle) {
@@ -3507,12 +3513,12 @@ HICON CreateVectorTrashIcon(int iconSize, bool isEmpty, bool isDarkTheme, std::w
 
         const bool useStyle1 = (vectorStyle.compare(L"style1") == 0);
         const bool useStyle2 = (vectorStyle.compare(L"style2") == 0);
-        const bool useMinibin = (vectorStyle.compare(L"minibin") == 0);
+        const bool useStyle4 = (vectorStyle.compare(L"style4") == 0);
 
-        // Styles 1, 2, and Minibin target the same bright foreground as Windows
-        // tray glyphs; Minibin's thin outline strokes need it for the same
+        // Styles 1, 2, and Style 4 target the same bright foreground as Windows
+        // tray glyphs; Style 4's thin outline strokes need it for the same
         // reason Style2's do.
-        const bool useBrightTrayColor = useStyle1 || useStyle2 || useMinibin;
+        const bool useBrightTrayColor = useStyle1 || useStyle2 || useStyle4;
         const Gdiplus::Color color =
             (isDarkTheme && useBrightTrayColor)
                 ? Gdiplus::Color(255, 255, 255, 255)
@@ -3578,14 +3584,14 @@ HICON CreateVectorTrashIcon(int iconSize, bool isEmpty, bool isDarkTheme, std::w
             Gdiplus::GraphicsPath lidPath;
             BuildLidPath_Style2(lidPath, s);
             g.FillPath(&brush, &lidPath);
-        } else if (useMinibin) {
-            // Minibin is one compound path per state; FillModeWinding is set
+        } else if (useStyle4) {
+            // Style 4 is one compound path per state; FillModeWinding is set
             // inside the Build functions themselves (see their comment).
             Gdiplus::GraphicsPath bodyPath;
             if (isEmpty) {
-                BuildBodyPath_Minibin_Empty(bodyPath, s24);
+                BuildBodyPath_Style4_Empty(bodyPath, s24);
             } else {
-                BuildBodyPath_Minibin_Full(bodyPath, s24);
+                BuildBodyPath_Style4_Full(bodyPath, s24);
             }
             g.FillPath(&brush, &bodyPath);
         } else {
